@@ -12,6 +12,7 @@ use crate::error::{Error, Result};
 use crate::fileformat::{Blob, BlobHeader};
 use crate::objects::{OsmId, OsmObj};
 use crate::osmformat::PrimitiveBlock;
+use crate::store_objs::StoreObjs;
 use par_map::{self, ParMap};
 use protobuf::Message;
 use pub_iterator_type::pub_iterator_type;
@@ -20,24 +21,6 @@ use std::collections::BTreeSet;
 use std::convert::From;
 use std::io::{self, Read};
 use std::iter;
-
-/// Trait to allow generic objects (not just BTreeMap) in some methods.
-pub trait StoreObjs {
-    /// Insert given object at given key index.
-    fn insert(&mut self, key: OsmId, value: OsmObj);
-    /// Check if object contains the given key.
-    fn contains_key(&self, key: &OsmId) -> bool;
-}
-
-impl StoreObjs for BTreeMap<OsmId, OsmObj> {
-    fn insert(&mut self, key: OsmId, value: OsmObj) {
-        self.insert(key, value);
-    }
-
-    fn contains_key(&self, key: &OsmId) -> bool {
-        self.contains_key(key)
-    }
-}
 
 /// The object to manage a pbf file.
 pub struct ParOsmPbfReader<R> {
@@ -66,7 +49,7 @@ impl<R: io::Read> ParOsmPbfReader<R> {
     ///
     /// ```
     /// let mut pbf = osmpbfreader::OsmPbfReader::new(std::io::empty());
-    /// for obj in pbf.par_iter().map(Result::unwrap) {
+    /// for obj in pbf.iter().map(Result::unwrap) {
     ///     println!("{:?}", obj);
     /// }
     /// ```
@@ -119,8 +102,8 @@ impl<R: io::Read> ParOsmPbfReader<R> {
     /// assert_eq!(pbf.into_inner().position(), 0);
     /// ```
     pub fn rewind(&mut self) -> Result<()>
-        where
-            R: io::Seek,
+    where
+        R: io::Seek,
     {
         self.r.seek(io::SeekFrom::Start(0))?;
         self.finished = false;
@@ -129,10 +112,10 @@ impl<R: io::Read> ParOsmPbfReader<R> {
 
     /// Same as `get_objs_and_deps` but generic.
     pub fn get_objs_and_deps_store<F, T>(&mut self, mut pred: F, objects: &mut T) -> Result<()>
-        where
-            R: io::Seek,
-            F: FnMut(&OsmObj) -> bool,
-            T: StoreObjs,
+    where
+        R: io::Seek,
+        F: FnMut(&OsmObj) -> bool,
+        T: StoreObjs,
     {
         let mut finished = false;
         let mut deps = BTreeSet::new();
@@ -188,9 +171,9 @@ impl<R: io::Read> ParOsmPbfReader<R> {
     /// }
     /// ```
     pub fn get_objs_and_deps<F>(&mut self, pred: F) -> Result<BTreeMap<OsmId, OsmObj>>
-        where
-            R: io::Seek,
-            F: FnMut(&OsmObj) -> bool,
+    where
+        R: io::Seek,
+        F: FnMut(&OsmObj) -> bool,
     {
         let mut objects = BTreeMap::new();
         match self.get_objs_and_deps_store(pred, &mut objects) {

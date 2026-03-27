@@ -98,7 +98,7 @@
 pub use error::Error;
 pub use error::Result;
 pub use objects::*;
-pub use reader::{primitive_block_from_blob, OsmPbfReader, StoreObjs};
+pub use reader::{primitive_block_from_blob, OsmPbfReader};
 pub use par_reader::{ParOsmPbfReader};
 
 pub mod blobs;
@@ -112,6 +112,7 @@ pub mod blocks;
 pub mod error;
 #[allow(missing_docs)]
 pub mod groups;
+mod store_objs;
 
 mod pbf {
     include!(concat!(env!("OUT_DIR"), "/mod.rs"));
