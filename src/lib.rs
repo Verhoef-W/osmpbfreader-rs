@@ -49,8 +49,8 @@
 //!
 //! ```rust
 //! use std::process::exit;
-//! let mut pbf = osmpbfreader::OsmPbfReader::new(std::io::empty());
-//! for obj in pbf.par_iter() {
+//! let mut pbf = osmpbfreader::ParOsmPbfReader::new(std::io::empty());
+//! for obj in pbf.iter() {
 //!     // error handling:
 //!     let obj = obj.unwrap_or_else(|e| {println!("{:?}", e); exit(1)});
 //!
@@ -99,10 +99,12 @@ pub use error::Error;
 pub use error::Result;
 pub use objects::*;
 pub use reader::{primitive_block_from_blob, OsmPbfReader, StoreObjs};
+pub use par_reader::{ParOsmPbfReader};
 
 pub mod blobs;
 pub mod objects;
 pub mod reader;
+pub mod par_reader;
 
 #[allow(missing_docs)]
 pub mod blocks;
