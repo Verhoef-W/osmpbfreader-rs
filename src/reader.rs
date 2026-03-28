@@ -22,16 +22,16 @@ use std::io::{self, Read};
 use std::iter;
 
 /// The object to manage a pbf file.
-pub struct OsmPbfReader<R> {
+pub struct Reader<R> {
     buf: Vec<u8>,
     r: R,
     finished: bool,
 }
 
-impl<R: io::Read> OsmPbfReader<R> {
+impl<R: io::Read> Reader<R> {
     /// Creates an OsmPbfReader from a Read object.
-    pub fn new(r: R) -> OsmPbfReader<R> {
-        OsmPbfReader {
+    pub fn new(r: R) -> Reader<R> {
+        Reader {
             buf: vec![],
             r,
             finished: false,
@@ -43,7 +43,7 @@ impl<R: io::Read> OsmPbfReader<R> {
     /// # Example
     ///
     /// ```
-    /// let mut pbf = osmpbfreader::OsmPbfReader::new(std::io::empty());
+    /// let mut pbf = osmpbfreader::Reader::new(std::io::empty());
     /// for obj in pbf.iter().map(Result::unwrap) {
     ///     println!("{:?}", obj);
     /// }
@@ -77,7 +77,7 @@ impl<R: io::Read> OsmPbfReader<R> {
     /// ```
     /// let mut cursor = std::io::Cursor::new([0, 0, 0]);
     /// cursor.set_position(2);
-    /// let mut pbf = osmpbfreader::OsmPbfReader::new(cursor);
+    /// let mut pbf = osmpbfreader::Reader::new(cursor);
     /// pbf.rewind().unwrap();
     /// assert_eq!(pbf.into_inner().position(), 0);
     /// ```
@@ -143,7 +143,7 @@ impl<R: io::Read> OsmPbfReader<R> {
     ///     obj.is_relation() && obj.tags().contains("boundary", "administrative")
     /// }
     ///
-    /// let mut pbf = osmpbfreader::OsmPbfReader::new(std::io::Cursor::new([]));
+    /// let mut pbf = osmpbfreader::Reader::new(std::io::Cursor::new([]));
     /// let objs = pbf.get_objs_and_deps(is_admin).unwrap();
     /// for (id, obj) in &objs {
     ///     println!("{:?}: {:?}", id, obj);
@@ -230,7 +230,7 @@ impl<R: io::Read> OsmPbfReader<R> {
 
 /// Iterator on the blobs of a file.
 pub struct Blobs<'a, R: 'a> {
-    opr: &'a mut OsmPbfReader<R>,
+    opr: &'a mut Reader<R>,
 }
 impl<R: io::Read> Iterator for Blobs<'_, R> {
     type Item = Result<Blob>;

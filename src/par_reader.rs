@@ -23,16 +23,16 @@ use std::io::{self, Read};
 use std::iter;
 
 /// The object to manage a pbf file.
-pub struct ParOsmPbfReader<R> {
+pub struct ParReader<R> {
     buf: Vec<u8>,
     r: R,
     finished: bool,
 }
 
-impl<R: io::Read> ParOsmPbfReader<R> {
+impl<R: io::Read> ParReader<R> {
     /// Creates an OsmPbfReader from a Read object.
-    pub fn new(r: R) -> ParOsmPbfReader<R> {
-        ParOsmPbfReader {
+    pub fn new(r: R) -> ParReader<R> {
+        ParReader {
             buf: vec![],
             r,
             finished: false,
@@ -48,7 +48,7 @@ impl<R: io::Read> ParOsmPbfReader<R> {
     /// # Example
     ///
     /// ```
-    /// let mut pbf = osmpbfreader::OsmPbfReader::new(std::io::empty());
+    /// let mut pbf = osmpbfreader::ParReader::new(std::io::empty());
     /// for obj in pbf.iter().map(Result::unwrap) {
     ///     println!("{:?}", obj);
     /// }
@@ -97,7 +97,7 @@ impl<R: io::Read> ParOsmPbfReader<R> {
     /// ```
     /// let mut cursor = std::io::Cursor::new([0, 0, 0]);
     /// cursor.set_position(2);
-    /// let mut pbf = osmpbfreader::OsmPbfReader::new(cursor);
+    /// let mut pbf = osmpbfreader::ParReader::new(cursor);
     /// pbf.rewind().unwrap();
     /// assert_eq!(pbf.into_inner().position(), 0);
     /// ```
@@ -164,7 +164,7 @@ impl<R: io::Read> ParOsmPbfReader<R> {
     ///     obj.is_relation() && obj.tags().contains("boundary", "administrative")
     /// }
     ///
-    /// let mut pbf = osmpbfreader::OsmPbfReader::new(std::io::Cursor::new([]));
+    /// let mut pbf = osmpbfreader::ParReader::new(std::io::Cursor::new([]));
     /// let objs = pbf.get_objs_and_deps(is_admin).unwrap();
     /// for (id, obj) in &objs {
     ///     println!("{:?}: {:?}", id, obj);
@@ -251,7 +251,7 @@ impl<R: io::Read> ParOsmPbfReader<R> {
 
 /// Iterator on the blobs of a file.
 pub struct Blobs<'a, R: 'a> {
-    opr: &'a mut ParOsmPbfReader<R>,
+    opr: &'a mut ParReader<R>,
 }
 impl<R: io::Read> Iterator for Blobs<'_, R> {
     type Item = Result<Blob>;
